@@ -1,4 +1,5 @@
 import os
+from functools import reduce
 import redis
 import time
 from flask import Flask, jsonify
@@ -6,11 +7,17 @@ from flask import Flask, jsonify
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379)
 
-
 def compute_fibonacci(n):
-    if n <= 1:
-        return n
-    return compute_fibonacci(n-2) + compute_fibonacci(n-1)
+    a = 1
+    b = 1
+    c = a + b
+    count = 4
+    while count <= n:
+        a = b
+        b = c
+        c = a + b
+        count += 1
+    return c
 
 def get_hit_count():
     retries = 5
@@ -30,6 +37,6 @@ def fib(nsteps):
     return jsonify({'result': 'Ok', 'nsteps': nsteps, 'fib': fib_number, 'hits': hits})
 
 if __name__ == '__main__':
-    env_port = os.getenv('FLASK_PORT')
-    env_debug = os.getenv('FLASK_DEBUG')
+    env_port = os.getenv('FLASK_PORT', 5000)
+    env_debug = os.getenv('FLASK_DEBUG', True)
     app.run(host='0.0.0.0', port=env_port, debug=env_debug)
