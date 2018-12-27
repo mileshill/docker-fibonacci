@@ -8,6 +8,9 @@ app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379)
 
 def compute_fibonacci(n):
+    cached = cache.get(n)
+    if cached is not None:
+        return cached
     a = 1
     b = 1
     c = a + b
@@ -17,6 +20,7 @@ def compute_fibonacci(n):
         b = c
         c = a + b
         count += 1
+    cache.set(n, count)
     return c
 
 def get_hit_count():
